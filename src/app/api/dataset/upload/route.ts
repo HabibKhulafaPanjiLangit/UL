@@ -29,9 +29,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Extract numeric columns
-    const numericColumns = Object.keys(records[0]).filter(key => {
+    const numericColumns = Object.keys(records[0] as Record<string, any>).filter(key => {
       return records.every(record => {
-        const value = parseFloat(record[key])
+        const value = parseFloat((record as Record<string, any>)[key])
         return !isNaN(value)
       })
     })
@@ -43,8 +43,9 @@ export async function POST(request: NextRequest) {
     // Convert to numeric data
     const numericData = records.map(record => {
       const numericRecord: any = {}
+      const typedRecord = record as Record<string, any>
       numericColumns.forEach(col => {
-        numericRecord[col] = parseFloat(record[col])
+        numericRecord[col] = parseFloat(typedRecord[col])
       })
       return numericRecord
     })

@@ -5,7 +5,12 @@ import { randomUUID } from 'crypto'
 export async function POST() {
   try {
     // Generate sample dataset
-    const sampleData = []
+    const sampleData: Array<{
+      feature1: number;
+      feature2: number;
+      feature3: number;
+      feature4: number;
+    }> = []
     const clusters = 3
     const pointsPerCluster = 30
     

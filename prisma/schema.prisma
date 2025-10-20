@@ -23,7 +23,11 @@ model Dataset {
   uploadedAt  DateTime @default(now())
   updatedAt   DateTime @updatedAt
   
-  models      Model[]
+  models                  Model[]
+  projects               ProjectDataset[]
+  dimensionalityReductions DimensionalityReduction[]
+  dataProfile            DataProfile?
+  reports                Report[]
   
   @@map("datasets")
 }
@@ -60,4 +64,139 @@ model ModelEvaluation {
   model       Model    @relation(fields: [modelId], references: [id], onDelete: Cascade)
   
   @@map("model_evaluations")
+}
+
+model User {
+  id          String   @id @default(cuid())
+  email       String   @unique
+  username    String   @unique
+  password    String
+  role        String   @default("user") // admin, user
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  projects    Project[]
+  experiments Experiment[]
+  
+  @@map("users")
+}
+
+model Project {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  isPublic    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  experiments Experiment[]
+  datasets    ProjectDataset[]
+  
+  @@map("projects")
+}
+
+model ProjectDataset {
+  id          String   @id @default(cuid())
+  
+  projectId   String
+  datasetId   String
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  dataset     Dataset  @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+  
+  @@unique([projectId, datasetId])
+  @@map("project_datasets")
+}
+
+model Experiment {
+  id              String   @id @default(cuid())
+  name            String
+  description     String?
+  status          String   @default("created") // created, running, completed, failed
+  config          String   // JSON configuration
+  results         String?  // JSON results
+  metrics         String?  // JSON metrics
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  projectId       String?
+  project         Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  
+  runs            ExperimentRun[]
+  reports         Report[]
+  
+  @@map("experiments")
+}
+
+model ExperimentRun {
+  id              String   @id @default(cuid())
+  runNumber       Int
+  algorithm       String   // kmeans, hierarchical, dbscan, optics, meanshift, gmm, spectral
+  parameters      String   // JSON parameters
+  status          String   @default("pending") // pending, running, completed, failed
+  results         String?  // JSON results
+  metrics         String?  // JSON evaluation metrics
+  duration        Int?     // execution time in milliseconds
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  experimentId    String
+  experiment      Experiment @relation(fields: [experimentId], references: [id], onDelete: Cascade)
+  
+  @@map("experiment_runs")
+}
+
+model DimensionalityReduction {
+  id              String   @id @default(cuid())
+  technique       String   // pca, tsne, umap
+  parameters      String   // JSON parameters
+  originalDims    Int
+  reducedDims     Int
+  inputData       String   // JSON input data
+  outputData      String   // JSON reduced data
+  explainedVariance String? // JSON explained variance (for PCA)
+  createdAt       DateTime @default(now())
+  
+  datasetId       String
+  dataset         Dataset  @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+  
+  @@map("dimensionality_reductions")
+}
+
+model DataProfile {
+  id              String   @id @default(cuid())
+  statistics      String   // JSON basic statistics
+  correlations    String   // JSON correlation matrix
+  distributions   String   // JSON distribution data
+  outliers        String   // JSON outlier detection results
+  missingData     String   // JSON missing data analysis
+  createdAt       DateTime @default(now())
+  
+  datasetId       String   @unique
+  dataset         Dataset  @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+  
+  @@map("data_profiles")
+}
+
+model Report {
+  id              String   @id @default(cuid())
+  title           String
+  type            String   // clustering_analysis, data_exploration, experiment_summary
+  content         String   // JSON report content
+  format          String   // pdf, html, json
+  filePath        String?  // path to generated file
+  createdAt       DateTime @default(now())
+  
+  experimentId    String?
+  experiment      Experiment? @relation(fields: [experimentId], references: [id], onDelete: SetNull)
+  
+  datasetId       String?
+  dataset         Dataset?    @relation(fields: [datasetId], references: [id], onDelete: SetNull)
+  
+  @@map("reports")
 }

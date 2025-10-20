@@ -164,8 +164,8 @@ export default function UnsupervisedLearningApp() {
     linkElement.click()
   }, [selectedResult])
 
-  const generateSampleData = () => {
-    const sampleData = []
+  const generateSampleData = (): Array<{x: number, y: number, cluster: number}> => {
+    const sampleData: Array<{x: number, y: number, cluster: number}> = []
     for (let i = 0; i < 100; i++) {
       const cluster = Math.floor(Math.random() * 3)
       const centerX = cluster === 0 ? 2 : cluster === 1 ? 8 : 5
