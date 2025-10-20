@@ -5,20 +5,57 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  // 禁用 Next.js 热重载，由 nodemon 处理重编译
-  reactStrictMode: false,
-  webpack: (config, { dev }) => {
-    if (dev) {
-      // 禁用 webpack 的热模块替换
+  reactStrictMode: true,
+  
+  // Vercel deployment optimizations
+  serverExternalPackages: ['@prisma/client', 'prisma'],  // Environment-specific configuration
+  webpack: (config, { dev, isServer }) => {
+    // Only apply dev-specific config in development
+    if (dev && !process.env.VERCEL) {
       config.watchOptions = {
-        ignored: ['**/*'], // 忽略所有文件变化
+        ignored: ['**/*'], // Ignore all file changes for nodemon handling
       };
     }
+
+    // Optimize for production
+    if (!dev) {
+      config.optimization.splitChunks.cacheGroups = {
+        ...config.optimization.splitChunks.cacheGroups,
+        prisma: {
+          name: 'prisma',
+          chunks: 'all',
+          test: /[\\/]node_modules[\\/](@prisma|prisma)[\\/]/,
+        },
+      };
+    }
+
     return config;
   },
+
   eslint: {
-    // 构建时忽略ESLint错误
+    // Skip ESLint during builds on Vercel
     ignoreDuringBuilds: true,
+  },  // Headers for better performance
+  async headers() {
+    return [
+      {
+        source: '/api/(.*)',
+        headers: [
+          {
+            key: 'Access-Control-Allow-Origin',
+            value: '*',
+          },
+          {
+            key: 'Access-Control-Allow-Methods',
+            value: 'GET, POST, PUT, DELETE, OPTIONS',
+          },
+          {
+            key: 'Access-Control-Allow-Headers',
+            value: 'Content-Type, Authorization',
+          },
+        ],
+      },
+    ];
   },
 };
 

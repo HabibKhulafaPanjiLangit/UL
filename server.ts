@@ -12,7 +12,7 @@ const hostname = '127.0.0.1';
 async function createCustomServer() {
   try {
     // Create Next.js app
-    const nextApp = next({ 
+    const nextApp = next({
       dev,
       dir: process.cwd(),
       // In production, use the current directory where .next is located

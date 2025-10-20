@@ -90,7 +90,7 @@ function parseCsv(content: string, resolve: Function, reject: Function) {
 function parseJson(content: string, resolve: Function, reject: Function) {
   try {
     const data = JSON.parse(content)
-    
+
     // Handle different JSON structures
     let parsedData = data
     if (Array.isArray(data)) {
@@ -101,7 +101,7 @@ function parseJson(content: string, resolve: Function, reject: Function) {
       // Convert object to array of key-value pairs
       parsedData = Object.entries(data).map(([key, value]) => ({ key, value }))
     }
-    
+
     resolve({ data: parsedData, format: 'json' })
   } catch (error) {
     reject(new Error('Invalid JSON format'))
@@ -112,18 +112,18 @@ function parseExcel(content: ArrayBuffer, resolve: Function, reject: Function) {
   try {
     const workbook = XLSX.read(content, { type: 'array' })
     const sheetName = workbook.SheetNames[0]
-    
+
     if (!sheetName) {
       reject(new Error('No sheets found in Excel file'))
       return
     }
-    
+
     const worksheet = workbook.Sheets[sheetName]
-    const data = XLSX.utils.sheet_to_json(worksheet, { 
+    const data = XLSX.utils.sheet_to_json(worksheet, {
       header: 1,
-      defval: null 
+      defval: null
     })
-    
+
     // Convert to object format with headers
     if (data.length > 0) {
       const headers = data[0] as string[]
@@ -134,7 +134,7 @@ function parseExcel(content: ArrayBuffer, resolve: Function, reject: Function) {
         })
         return obj
       })
-      
+
       resolve({ data: rows, format: 'excel' })
     } else {
       resolve({ data: [], format: 'excel' })
@@ -291,8 +291,8 @@ export function cleanData(data: any[], options: DataCleaningOptions = {}): any[]
 
       cleanedData = cleanedData.map(row => ({
         ...row,
-        [column]: (row[column] !== null && row[column] !== undefined && row[column] !== '') 
-          ? Number(row[column]) 
+        [column]: (row[column] !== null && row[column] !== undefined && row[column] !== '')
+          ? Number(row[column])
           : fillValue
       }))
     }
@@ -324,9 +324,9 @@ export function cleanData(data: any[], options: DataCleaningOptions = {}): any[]
   if (options.removeOutliers && options.outlierMethod) {
     for (const column of numericColumns) {
       const values = cleanedData.map(row => Number(row[column])).filter(v => !isNaN(v))
-      
+
       let outlierIndices: number[] = []
-      
+
       if (options.outlierMethod === 'iqr') {
         const sorted = [...values].sort((a, b) => a - b)
         const q1 = sorted[Math.floor(sorted.length * 0.25)]
@@ -334,7 +334,7 @@ export function cleanData(data: any[], options: DataCleaningOptions = {}): any[]
         const iqr = q3 - q1
         const lowerBound = q1 - 1.5 * iqr
         const upperBound = q3 + 1.5 * iqr
-        
+
         cleanedData.forEach((row, index) => {
           const val = Number(row[column])
           if (val < lowerBound || val > upperBound) {
@@ -345,7 +345,7 @@ export function cleanData(data: any[], options: DataCleaningOptions = {}): any[]
         const mean = values.reduce((sum, val) => sum + val, 0) / values.length
         const std = Math.sqrt(values.reduce((sum, val) => sum + (val - mean) ** 2, 0) / values.length)
         const threshold = options.outlierThreshold || 3
-        
+
         cleanedData.forEach((row, index) => {
           const val = Number(row[column])
           const zscore = Math.abs((val - mean) / std)
@@ -354,7 +354,7 @@ export function cleanData(data: any[], options: DataCleaningOptions = {}): any[]
           }
         })
       }
-      
+
       // Remove outliers (only if not too many)
       if (outlierIndices.length < cleanedData.length * 0.1) {
         cleanedData = cleanedData.filter((_, index) => !outlierIndices.includes(index))
@@ -365,7 +365,7 @@ export function cleanData(data: any[], options: DataCleaningOptions = {}): any[]
   // Normalize numeric data
   if (options.normalizeNumeric) {
     const stats: { [key: string]: { min: number; max: number } } = {}
-    
+
     // Calculate min/max for each numeric column
     for (const column of numericColumns) {
       const values = cleanedData.map(row => Number(row[column])).filter(v => !isNaN(v))
@@ -374,7 +374,7 @@ export function cleanData(data: any[], options: DataCleaningOptions = {}): any[]
         max: Math.max(...values)
       }
     }
-    
+
     // Normalize to 0-1 range
     cleanedData = cleanedData.map(row => {
       const newRow = { ...row }
@@ -425,14 +425,14 @@ function exportToExcel(data: any[], filename?: string): Blob {
   const worksheet = XLSX.utils.json_to_sheet(data)
   const workbook = XLSX.utils.book_new()
   XLSX.utils.book_append_sheet(workbook, worksheet, 'Data')
-  
-  const excelBuffer = XLSX.write(workbook, { 
-    bookType: 'xlsx', 
-    type: 'array' 
+
+  const excelBuffer = XLSX.write(workbook, {
+    bookType: 'xlsx',
+    type: 'array'
   })
-  
-  return new Blob([excelBuffer], { 
-    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+
+  return new Blob([excelBuffer], {
+    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
   })
 }
 
@@ -443,12 +443,12 @@ export function generateDataSample(data: any[], sampleSize: number = 100): any[]
   if (data.length <= sampleSize) {
     return data
   }
-  
+
   // Random sampling
   const indices = new Set<number>()
   while (indices.size < sampleSize) {
     indices.add(Math.floor(Math.random() * data.length))
   }
-  
+
   return Array.from(indices).map(i => data[i])
 }

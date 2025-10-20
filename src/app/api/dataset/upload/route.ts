@@ -7,7 +7,7 @@ export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData()
     const file = formData.get('file') as File
-    
+
     if (!file) {
       return NextResponse.json({ error: 'No file uploaded' }, { status: 400 })
     }
@@ -15,8 +15,8 @@ export async function POST(request: NextRequest) {
     // Check file size before processing (max 50MB)
     const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
     if (file.size > MAX_FILE_SIZE) {
-      return NextResponse.json({ 
-        error: `File too large (${(file.size / (1024 * 1024)).toFixed(2)}MB). Maximum allowed size is 50MB.` 
+      return NextResponse.json({
+        error: `File too large (${(file.size / (1024 * 1024)).toFixed(2)}MB). Maximum allowed size is 50MB.`
       }, { status: 413 })
     }
 
@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
     // Check dataset size - limit to prevent database overflow
     const MAX_ROWS = 10000; // Limit rows to prevent large datasets
     const limitedRecords = records.slice(0, MAX_ROWS);
-    
+
     if (records.length > MAX_ROWS) {
       console.warn(`Dataset truncated from ${records.length} to ${MAX_ROWS} rows to prevent database overflow`);
     }
@@ -77,11 +77,11 @@ export async function POST(request: NextRequest) {
       columns: numericColumns,
       data: numericData
     });
-    
+
     const dataSizeInMB = Buffer.byteLength(dataString, 'utf8') / (1024 * 1024);
     if (dataSizeInMB > 4) { // Keep under 4MB to be safe
-      return NextResponse.json({ 
-        error: `Dataset too large (${dataSizeInMB.toFixed(2)}MB). Please use a smaller dataset (max 4MB).` 
+      return NextResponse.json({
+        error: `Dataset too large (${dataSizeInMB.toFixed(2)}MB). Please use a smaller dataset (max 4MB).`
       }, { status: 413 })
     }
 

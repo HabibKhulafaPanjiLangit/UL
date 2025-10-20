@@ -13,11 +13,11 @@ export async function POST() {
     }> = []
     const clusters = 3
     const pointsPerCluster = 30
-    
+
     for (let c = 0; c < clusters; c++) {
       const centerX = (c + 1) * 3
       const centerY = (c + 1) * 3
-      
+
       for (let i = 0; i < pointsPerCluster; i++) {
         sampleData.push({
           feature1: centerX + (Math.random() - 0.5) * 2,
@@ -27,7 +27,7 @@ export async function POST() {
         })
       }
     }
-    
+
     // Store in database
     const dataset = await db.dataset.create({
       data: {
@@ -57,9 +57,9 @@ export async function POST() {
   } catch (error) {
     console.error('Sample generation error:', error)
     const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-    return NextResponse.json({ 
-      error: 'Failed to generate sample data', 
-      details: errorMessage 
+    return NextResponse.json({
+      error: 'Failed to generate sample data',
+      details: errorMessage
     }, { status: 500 })
   }
 }
