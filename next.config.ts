@@ -6,7 +6,7 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true,
   },
   reactStrictMode: true,
-  
+
   // Vercel deployment optimizations
   serverExternalPackages: ['@prisma/client', 'prisma'],  // Environment-specific configuration
   webpack: (config, { dev, isServer }) => {
