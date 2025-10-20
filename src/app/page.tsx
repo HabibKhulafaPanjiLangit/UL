@@ -54,14 +54,17 @@ export default function UnsupervisedLearningApp() {
       })
 
       if (!response.ok) {
-        throw new Error('Sample generation failed')
+        const errorData = await response.json()
+        throw new Error(errorData.details || errorData.error || 'Sample generation failed')
       }
 
       const result = await response.json()
       setDatasets(prev => [...prev, result.dataset])
       setSuccess('Sample dataset generated successfully!')
     } catch (err) {
-      setError('Failed to generate sample data')
+      const errorMessage = err instanceof Error ? err.message : 'Failed to generate sample data'
+      setError(errorMessage)
+      console.error('Sample generation error:', err)
     }
   }, [])
 
