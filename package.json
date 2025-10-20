@@ -12,8 +12,8 @@
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:reset": "prisma migrate reset",
-    "postinstall": "prisma generate",
-    "vercel-build": "prisma generate && next build"
+    "postinstall": "prisma generate --no-engine",
+    "vercel-build": "prisma generate --no-engine && next build"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
