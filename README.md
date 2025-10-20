@@ -1,6 +1,68 @@
-# Unsupervised Learning Platform
+# 🎯 UL Platform - Unsupervised Learning Platform
 
-A comprehensive web-based platform for unsupervised machine learning with multiple clustering algorithms and visualization capabilities.
+A comprehensive web-based platform for unsupervised machine learning with multiple clustering algorithms, real-time visualization, and advanced data analysis capabilities.
+
+![UL Platform](https://img.shields.io/badge/UL-Platform-blue) ![Next.js](https://img.shields.io/badge/Next.js-15.3.5-black) ![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue) ![Tailwind](https://img.shields.io/badge/Tailwind-CSS-38B2AC)
+
+## 🚀 Quick Start
+
+### Prerequisites
+- Node.js 18+ 
+- npm or yarn
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/HabibKhulafaPanjiLangit/UL.git
+   cd UL
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Setup environment**
+   ```bash
+   cp .env.example .env
+   ```
+
+4. **Initialize database**
+   ```bash
+   npx prisma generate
+   npx prisma db push
+   ```
+
+5. **Run the application**
+   ```bash
+   npm run dev
+   ```
+
+6. **Open your browser**
+   Navigate to `http://localhost:3000`
+
+## 🛠 Technology Stack
+
+### Frontend
+- **Next.js 15.3.5** - React framework with App Router
+- **TypeScript** - Type-safe development
+- **Tailwind CSS** - Utility-first CSS framework  
+- **shadcn/ui** - Beautiful and accessible UI components
+- **Recharts** - Interactive data visualization
+- **Lucide React** - Beautiful icons
+
+### Backend
+- **Node.js** - Server runtime
+- **Socket.IO** - Real-time communication
+- **Prisma ORM** - Type-safe database access
+- **SQLite** - Embedded database
+- **tsx** - TypeScript execution
+
+### Development Tools
+- **ESLint** - Code linting
+- **Nodemon** - Development server auto-restart
+- **PostCSS** - CSS processing
 
 ## Features
 
