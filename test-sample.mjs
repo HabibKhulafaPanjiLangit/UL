@@ -9,7 +9,7 @@ const db = new PrismaClient({
 async function generateSampleData() {
   try {
     console.log('Generating sample data...')
-    
+
     // Generate sample dataset
     const sampleData = []
     const clusters = 3
@@ -48,7 +48,7 @@ async function generateSampleData() {
 
     console.log('✅ Sample data created successfully with ID:', dataset.id)
     console.log('Dataset name:', dataset.name)
-    
+
   } catch (error) {
     console.error('❌ Sample generation error:', error.message)
     console.error('Full error:', error)

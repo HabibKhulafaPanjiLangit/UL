@@ -158,9 +158,9 @@ export default function UnsupervisedLearningApp() {
 
     const dataStr = JSON.stringify(selectedResult, null, 2)
     const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr)
-    
+
     const exportFileDefaultName = `clustering_results_${selectedResult.algorithm}_${Date.now()}.json`
-    
+
     const linkElement = document.createElement('a')
     linkElement.setAttribute('href', dataUri)
     linkElement.setAttribute('download', exportFileDefaultName)

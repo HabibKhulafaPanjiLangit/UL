@@ -11,7 +11,7 @@ async function testSampleAPI() {
     });
 
     console.log('Response status:', response.status);
-    
+
     if (!response.ok) {
       const errorText = await response.text();
       console.log('Error response:', errorText);
