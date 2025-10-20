@@ -48,6 +48,17 @@ async function createCustomServer() {
       console.log(`> Socket.IO server running at ws://${hostname}:${currentPort}/api/socketio`);
     });
 
+    // Handle unhandled promise rejections
+    process.on('unhandledRejection', (reason, promise) => {
+      console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+    });
+
+    // Handle uncaught exceptions
+    process.on('uncaughtException', (error) => {
+      console.error('Uncaught Exception:', error);
+      process.exit(1);
+    });
+
   } catch (err) {
     console.error('Server startup error:', err);
     process.exit(1);

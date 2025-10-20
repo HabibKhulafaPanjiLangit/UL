@@ -75,12 +75,15 @@ function parseCsv(content: string, resolve: Function, reject: Function) {
     skipEmptyLines: true,
     complete: (result) => {
       if (result.errors.length > 0) {
-        reject(new Error(`CSV parsing errors: ${result.errors.map(e => e.message).join(', ')}`))
+        const errorMessages = result.errors
+          .map(e => typeof e === 'object' && 'message' in e ? e.message : String(e))
+          .join(', ');
+        reject(new Error(`CSV parsing errors: ${errorMessages}`))
       } else {
         resolve({ data: result.data, format: 'csv' })
       }
     },
-    error: (error) => reject(error)
+    error: (error) => reject(new Error(`CSV parsing failed: ${error instanceof Error ? error.message : 'Unknown error'}`))
   })
 }
 

@@ -12,6 +12,19 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No file uploaded' }, { status: 400 })
     }
 
+    // Check file size before processing (max 50MB)
+    const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
+    if (file.size > MAX_FILE_SIZE) {
+      return NextResponse.json({ 
+        error: `File too large (${(file.size / (1024 * 1024)).toFixed(2)}MB). Maximum allowed size is 50MB.` 
+      }, { status: 413 })
+    }
+
+    // Check file type
+    if (!file.name.toLowerCase().endsWith('.csv')) {
+      return NextResponse.json({ error: 'Only CSV files are supported' }, { status: 400 })
+    }
+
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
     const csvContent = buffer.toString('utf-8')
@@ -40,15 +53,37 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No numeric columns found in CSV' }, { status: 400 })
     }
 
+    // Check dataset size - limit to prevent database overflow
+    const MAX_ROWS = 10000; // Limit rows to prevent large datasets
+    const limitedRecords = records.slice(0, MAX_ROWS);
+    
+    if (records.length > MAX_ROWS) {
+      console.warn(`Dataset truncated from ${records.length} to ${MAX_ROWS} rows to prevent database overflow`);
+    }
+
     // Convert to numeric data
-    const numericData = records.map(record => {
+    const numericData = limitedRecords.map(record => {
       const numericRecord: any = {}
       const typedRecord = record as Record<string, any>
       numericColumns.forEach(col => {
-        numericRecord[col] = parseFloat(typedRecord[col])
+        const value = parseFloat(typedRecord[col])
+        numericRecord[col] = isNaN(value) ? 0 : value // Handle NaN values
       })
       return numericRecord
     })
+
+    // Check final data size before storing
+    const dataString = JSON.stringify({
+      columns: numericColumns,
+      data: numericData
+    });
+    
+    const dataSizeInMB = Buffer.byteLength(dataString, 'utf8') / (1024 * 1024);
+    if (dataSizeInMB > 4) { // Keep under 4MB to be safe
+      return NextResponse.json({ 
+        error: `Dataset too large (${dataSizeInMB.toFixed(2)}MB). Please use a smaller dataset (max 4MB).` 
+      }, { status: 413 })
+    }
 
     // Store in database
     const dataset = await db.dataset.create({
@@ -56,12 +91,9 @@ export async function POST(request: NextRequest) {
         id: randomUUID(),
         name: file.name.replace('.csv', ''),
         filename: file.name,
-        rows: records.length,
+        rows: limitedRecords.length,
         columns: numericColumns.length,
-        data: JSON.stringify({
-          columns: numericColumns,
-          data: numericData
-        })
+        data: dataString
       }
     })
 
@@ -73,7 +105,8 @@ export async function POST(request: NextRequest) {
         rows: dataset.rows,
         columns: dataset.columns,
         uploadedAt: dataset.uploadedAt
-      }
+      },
+      warning: records.length > MAX_ROWS ? `Dataset was truncated to ${MAX_ROWS} rows` : undefined
     })
 
   } catch (error) {

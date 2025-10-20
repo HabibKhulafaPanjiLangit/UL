@@ -56,6 +56,10 @@ export async function POST() {
 
   } catch (error) {
     console.error('Sample generation error:', error)
-    return NextResponse.json({ error: 'Failed to generate sample data' }, { status: 500 })
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    return NextResponse.json({ 
+      error: 'Failed to generate sample data', 
+      details: errorMessage 
+    }, { status: 500 })
   }
 }

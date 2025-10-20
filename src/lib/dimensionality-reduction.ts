@@ -46,7 +46,7 @@ export function performPCA(data: number[][], components: number = 2): Dimensiona
     }
   } catch (error) {
     console.error('PCA Error:', error)
-    throw new Error('PCA computation failed')
+    throw new Error(`PCA computation failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
   }
 }
 
