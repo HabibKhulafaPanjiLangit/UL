@@ -1,0 +1,63 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Dataset {
+  id          String   @id @default(cuid())
+  name        String
+  filename    String
+  rows        Int
+  columns     Int
+  data        String   // JSON string of the dataset
+  uploadedAt  DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  models      Model[]
+  
+  @@map("datasets")
+}
+
+model Model {
+  id              String   @id @default(cuid())
+  name            String
+  algorithm       String   // kmeans, hierarchical, dbscan
+  parameters      String   // JSON string of model parameters
+  numClusters     Int
+  silhouetteScore Float
+  inertia         Float
+  status          String   @default("training") // training, completed, failed
+  resultData      String?  // JSON string of clustering results
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  datasetId       String
+  dataset         Dataset  @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+  
+  evaluations     ModelEvaluation[]
+  
+  @@map("models")
+}
+
+model ModelEvaluation {
+  id          String   @id @default(cuid())
+  metric      String   // silhouette, inertia, davies_bouldin, calinski_harabasz
+  value       Float
+  parameters  String   // JSON string of evaluation parameters
+  createdAt   DateTime @default(now())
+  
+  modelId     String
+  model       Model    @relation(fields: [modelId], references: [id], onDelete: Cascade)
+  
+  @@map("model_evaluations")
+}
